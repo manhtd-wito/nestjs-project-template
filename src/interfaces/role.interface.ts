@@ -1,11 +1,9 @@
-import { Role } from '../database/role.schema';
 import { Permission } from '../database/permission.schema';
 
-export interface User {
+export interface Role {
   name: string;
-  email: string;
-  password: string;
-  roles: Role[];
+  description: string;
+  slug: string;
   permissions: Permission[];
   createdAt: Date;
   updatedAt: Date;

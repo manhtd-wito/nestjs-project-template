@@ -5,15 +5,18 @@ import {
   Put,
   Delete,
   Res,
+  Query,
   Body,
   Param,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { CreateUserDto } from '../dto/create_user.dto';
 import { UpdateUserDto } from '../dto/update_user.dto';
 import { UserService } from '../services/user.service';
 import { AuthGuard } from '../guards/auth.guard';
+import { PermissionGuard } from '../guards/permission.guard';
+import { Permission } from '../guards/permission.decorator';
 
 @ApiTags('users')
 @ApiBearerAuth('access_token')
@@ -22,20 +25,24 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @UseGuards(AuthGuard)
-  async index(@Res() response) {
-    const users = await this.userService.findAll()
+  @Permission('view-user')
+  @ApiQuery({ name: 'page' })
+  @UseGuards(AuthGuard, PermissionGuard)
+  async index(@Query() page: number = 1, @Res() response) {
+    const users = await this.userService.findAll(page);
 
     return response.status(200).send({
       success: true,
       users,
+      page,
     });
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
+  @Permission('view-user')
+  @UseGuards(AuthGuard, PermissionGuard)
   async detail(@Param('id') id: string, @Res() response) {
-    const user = await this.userService.findOne(id)
+    const user = await this.userService.findOne(id);
 
     return response.status(200).send({
       success: true,
@@ -44,9 +51,10 @@ export class UserController {
   }
 
   @Post()
-  @UseGuards(AuthGuard)
+  @Permission('create-user')
+  @UseGuards(AuthGuard, PermissionGuard)
   async store(@Body() body: CreateUserDto, @Res() response) {
-    const result = await this.userService.create(body)
+    const result = await this.userService.create(body);
 
     return response.status(201).send({
       success: true,
@@ -56,9 +64,14 @@ export class UserController {
   }
 
   @Put(':id')
-  @UseGuards(AuthGuard)
-  async update(@Param('id') id: string, @Body() body: UpdateUserDto, @Res() response) {
-    const result = await this.userService.update(id, body)
+  @Permission('update-user')
+  @UseGuards(AuthGuard, PermissionGuard)
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateUserDto,
+    @Res() response,
+  ) {
+    const result = await this.userService.update(id, body);
 
     return response.status(200).send({
       success: true,
@@ -68,9 +81,10 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
+  @Permission('delete-user')
+  @UseGuards(AuthGuard, PermissionGuard)
   async delete(@Param('id') id: string, @Res() response) {
-    const result = await this.userService.delete(id)
+    const result = await this.userService.delete(id);
 
     return response.status(200).send({
       success: true,

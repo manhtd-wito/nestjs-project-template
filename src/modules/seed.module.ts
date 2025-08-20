@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './modules/user.module';
-import { AuthModule } from './modules/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UserModule } from './user.module';
+import { ConfigModule } from '@nestjs/config';
+import { SeedService } from '../services/seed.service';
+import { UserSchema } from '../database/user.schema';
+import { RoleSchema } from '../database/role.schema';
+import { PermissionSchema } from '../database/permission.schema';
 import { Connection } from 'mongoose';
 
 @Module({
@@ -32,12 +33,21 @@ import { Connection } from 'mongoose';
         },
       },
     ),
-    UserModule,
-    AuthModule,
+    MongooseModule.forFeature([
+      {
+        name: 'User',
+        schema: UserSchema,
+      },
+      {
+        name: 'Role',
+        schema: RoleSchema,
+      },
+      {
+        name: 'Permission',
+        schema: PermissionSchema,
+      },
+    ]),
   ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-  ],
+  providers: [SeedService],
 })
-export class AppModule {}
+export class SeedModule {}

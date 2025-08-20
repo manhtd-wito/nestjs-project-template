@@ -1,25 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { Role } from './role.schema';
 import { Permission } from './permission.schema';
 import * as mongoose from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type RoleDocument = HydratedDocument<Role>;
 
 
 @Schema()
-export class User {
+export class Role {
   @Prop()
   name: string;
 
   @Prop()
-  email: string;
+  description: string;
 
   @Prop()
-  password: string;
-
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }] })
-  roles: Role[];
+  slug: string;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permission' }] })
   permissions: Permission[];
@@ -31,4 +27,4 @@ export class User {
   updatedAt: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const RoleSchema = SchemaFactory.createForClass(Role);
